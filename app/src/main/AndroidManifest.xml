@@ -22,8 +22,7 @@
 
     <application
         android:allowBackup="true"
-        android:label="ImageSender"
-        android:theme="@style/Theme.AppCompat">
+        android:label="ImageSender">
 
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>

@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace 'com.dotbhai.imagesender' // تأكد أن هذا الاسم مطابق لمشروعك
+    namespace 'com.dotbhai.imagesender'
     compileSdk 34
 
     defaultConfig {

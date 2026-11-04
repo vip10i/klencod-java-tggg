@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -35,13 +36,17 @@ public class MainActivity extends Activity {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(50, 50, 50, 50);
 
+        TextView tv = new TextView(this);
+        tv.setText("اضغط الزر بالأسفل لتشغيل البوت.\nتأكد من الموافقة على جميع الأذونات.");
+        tv.setTextSize(16);
+        layout.addView(tv);
+
         Button btnStart = new Button(this);
         btnStart.setText("تشغيل البوت");
         layout.addView(btnStart);
 
         setContentView(layout);
 
-        // طلب الأذونات
         if (Build.VERSION.SDK_INT >= 23) {
             requestPermissions(PERMS, PERM_REQ);
         }

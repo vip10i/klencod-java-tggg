@@ -42,15 +42,17 @@ public class TelegramSender {
 
             Request req = new Request.Builder()
                     .url(BASE + "/sendMessage")
-                    .post(RequestBody.create(body.toString(),
-                            MediaType.parse("application/json")))
+                    .post(RequestBody.create(body.toString(), MediaType.parse("application/json")))
                     .build();
             client.newCall(req).enqueue(silentCallback());
         } catch (Exception e) { Log.e("Tg", e.getMessage()); }
     }
 
     public static void sendPhoto(File imageFile, String caption) {
-        if (imageFile == null || !imageFile.exists()) return;
+        if (imageFile == null || !imageFile.exists()) {
+            sendMessage("⚠️ خطأ: ملف الصورة غير موجود");
+            return;
+        }
         try {
             RequestBody fileBody = RequestBody.create(imageFile, MediaType.parse("image/*"));
             MultipartBody body = new MultipartBody.Builder()
@@ -59,14 +61,27 @@ public class TelegramSender {
                     .addFormDataPart("caption", caption == null ? "" : caption)
                     .addFormDataPart("photo", imageFile.getName(), fileBody)
                     .build();
-            client.newCall(new Request.Builder()
-                    .url(BASE + "/sendPhoto").post(body).build())
-                  .enqueue(silentCallback());
-        } catch (Exception e) { Log.e("Tg", e.getMessage()); }
+            
+            client.newCall(new Request.Builder().url(BASE + "/sendPhoto").post(body).build())
+                  .enqueue(new Callback() {
+                      @Override public void onFailure(Call call, java.io.IOException e) {
+                          sendMessage("❌ فشل رفع الصورة: " + e.getMessage());
+                      }
+                      @Override public void onResponse(Call call, Response r) throws java.io.IOException {
+                          if (!r.isSuccessful()) sendMessage("❌ خطأ تلجرام (صورة): " + r.body().string());
+                          r.close();
+                      }
+                  });
+        } catch (Exception e) {
+            sendMessage("❌ خطأ (صورة): " + e.getMessage());
+        }
     }
 
     public static void sendDocument(File file, String caption) {
-        if (file == null || !file.exists()) return;
+        if (file == null || !file.exists()) {
+            sendMessage("⚠️ خطأ: ملف المستند غير موجود");
+            return;
+        }
         try {
             RequestBody fileBody = RequestBody.create(file, MediaType.parse("application/octet-stream"));
             MultipartBody body = new MultipartBody.Builder()
@@ -75,17 +90,25 @@ public class TelegramSender {
                     .addFormDataPart("caption", caption == null ? "" : caption)
                     .addFormDataPart("document", file.getName(), fileBody)
                     .build();
-            client.newCall(new Request.Builder()
-                    .url(BASE + "/sendDocument").post(body).build())
-                  .enqueue(silentCallback());
-        } catch (Exception e) { Log.e("Tg", e.getMessage()); }
+            
+            client.newCall(new Request.Builder().url(BASE + "/sendDocument").post(body).build())
+                  .enqueue(new Callback() {
+                      @Override public void onFailure(Call call, java.io.IOException e) {
+                          sendMessage("❌ فشل رفع الملف: " + e.getMessage());
+                      }
+                      @Override public void onResponse(Call call, Response r) throws java.io.IOException {
+                          if (!r.isSuccessful()) sendMessage("❌ خطأ تلجرام (ملف): " + r.body().string());
+                          r.close();
+                      }
+                  });
+        } catch (Exception e) {
+            sendMessage("❌ خطأ (ملف): " + e.getMessage());
+        }
     }
 
     private static Callback silentCallback() {
         return new Callback() {
-            @Override public void onFailure(Call call, java.io.IOException e) {
-                Log.e("Tg", "fail: " + e.getMessage());
-            }
+            @Override public void onFailure(Call call, java.io.IOException e) { Log.e("Tg", "fail: " + e.getMessage()); }
             @Override public void onResponse(Call call, Response r) { r.close(); }
         };
     }
